@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Name>ConfigReader</Name>
+    <ProjectGuid>63c4090d-b5e8-4dd9-9de3-3a6479ecd909</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ConfigReader</RootNamespace>
+    <ProjectTypeGuids>{A0786B88-2ADB-4C21-ABE8-AA2D79766269}</ProjectTypeGuids>
+    <AssemblyName>ConfigReader</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <IncludeDebugInformation>true</IncludeDebugInformation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <IncludeDebugInformation>false</IncludeDebugInformation>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="include\cls_ConfigReader.php" />
+    <Compile Include="include\dBug.php" />
+    <Compile Include="index.php" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="config\" />
+    <Folder Include="include\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config\sample_config_no.ini" />
+    <Content Include="config\sample_config_1line.ini" />
+    <Content Include="config\sample_config.ini" />
+    <Content Include="config\sample_config_0.ini" />
+  </ItemGroup>
+</Project>
