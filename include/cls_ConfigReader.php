@@ -136,7 +136,7 @@ class ConfigReader {
      */
     private function isFileValid($logpath) {
         if(file_exists($logpath) === false) {
-            $this->raiseError(900, "The specified file does not exist.");
+            $this->raiseError(900, "The specified file '" . $logpath . "' does not exist.");
             return false;
         }
         $ret = $this->FileSize = filesize($logpath);
