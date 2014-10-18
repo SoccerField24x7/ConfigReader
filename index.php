@@ -42,4 +42,20 @@ if($val === false) {
     exit();
 }
 print "<br />The value is: " . $val;
+
+print "<br /><br /><strong>And now we'll search for a value that doesn't exist (server_dead):</strong>";
+$val = $oReader->getParameterByName("server_dead");
+if($val === false) {
+    print "<br />The requested configuration parameter was not found!";
+    //exit();  //let the script continue for more examples.
+}
+
+$oReader = null;
+
+print "<br /><br /><strong>Let's try to load a file that doesn't exist:</strong>";
+$oReader = new ConfigReader("/path/thisfileisnothere.ini");
+if($oReader->ErrNo) {
+    print "<br />" . $oReader->Error;
+}
+
 ?>
