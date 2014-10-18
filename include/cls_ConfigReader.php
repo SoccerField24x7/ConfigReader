@@ -1,8 +1,6 @@
 <?php
 /**
- * ConfigReader short summary.
- *
- * ConfigReader description.
+ * Highly flexible class to parse a key=value configuration (ini) file.
  *
  * @version 1.0
  * @author Jesse Quijano
@@ -42,7 +40,8 @@ class ConfigReader {
     
     /**
      * Set the location of the configuration file.
-     * @param string $logfile 
+     * 
+     * @param string $logfile Complete path to the configuration file.
      * @return boolean
      */
     public function setConfigFile($logfile) {
@@ -57,7 +56,8 @@ class ConfigReader {
         return true;
     }
     /**
-     * Summary of loadConfigFile
+     * Public facing method to load/read the configuration file.
+     * 
      * @return boolean
      */
     public function loadConfigFile() {
@@ -129,8 +129,9 @@ class ConfigReader {
         return $this->arryConfigItems[$index];
     }
     /**
-     * Summary of isFileValid
-     * @param string $logpath 
+     * Performs several tests to determine if the supplied file is valid.  Does not determine whether there are valid configuration line items.
+     * 
+     * @param string $logpath Complete path to the configuration file.
      * @return boolean
      */
     private function isFileValid($logpath) {
@@ -157,7 +158,7 @@ class ConfigReader {
     }
     /**
      * Counts the number of lines in the configuration file.  To guard against buffer overruns, we load the file chunk by chunk. (this is faster than "line by line" on larger files)
-     * @param string $logpath 
+     * @param string $logpath Complete path to the configuration file.
      * @return boolean
      */
     private function countFileLines($logpath) {
@@ -175,9 +176,7 @@ class ConfigReader {
     }
     
     /**
-     * Used to count the number of lines in a configuration file.  Please note, this is ALL lines, not all valid configuration lines.
-     * 
-     * @param string $logpath
+     * Reads the configuration file, line by line and calling getValue() to extract key/value pairs.
      * @return boolean
      */
     private function readConfigFile() {
@@ -212,8 +211,8 @@ class ConfigReader {
      * 
      * Used strpos() instead of a regex match since we are looking for the FIRST occurance of a single character (simpler)
      * 
-     * @param string $line
-     * @param int $lineno
+     * @param string $line One line pulled from configuratin file.
+     * @param int $lineno (optional) Specifies the line number within the configuration file of $line.
      * @return boolean
      */
     private function getValue($line, $lineno=0) {
@@ -263,7 +262,7 @@ class ConfigReader {
     
     /**
      * Tests to determine whether the supplied parameter should be skipped (comment , or blank line)
-     * @param string $line 
+     * @param string $line Single line from configruation file.
      * @return boolean
      */
     private function isComment($line) {
