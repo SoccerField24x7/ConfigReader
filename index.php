@@ -1,6 +1,5 @@
 <?php
 require_once("include/cls_ConfigReader.php");
-require_once("include/dBug.php"); //third-party object to make pretty dbug output
 
 $oReader = new ConfigReader();
 
