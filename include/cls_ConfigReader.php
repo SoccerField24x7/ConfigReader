@@ -29,22 +29,21 @@ class ConfigReader {
     public const BOOLEAN = 4;
     public const ASSUME_BOOL = true;  //use this to change yes/no, on/off, true/false to actual boolean values
     
-    public function __construct(string $logfile = "") {
-        /* allow instantiation without passing the logfile, but if you do validate and die if  */
-        if($logfile != "") {
+    public function __construct(string $inFile = "") {
 
-            if(!$this->isFileValid($logfile)) {
+        $this->initMessages();
 
-                throw new Exception();
+        /* allow instantiation without passing the logfile, but if you do validate and die if invalid */
+        if($inFile != "") {
+
+            if(!$this->isFileValid($inFile)) {
+
+                throw new ConfigFileException($this->arryMessages[7]);
             }
 
-            $this->ConfigFile = $logfile;
-            if(!$this->setConfigFile($logfile)) {
+            $this->ConfigFile = $inFile;
 
-                throw new Exception();
-            }
 
-            $this->initMessages();
         }
     }
     
@@ -338,8 +337,9 @@ class ConfigReader {
                     'The specified file is 0 bytes (no data).',
                     'Error retrieving file size.',
                     'You must first load the configuration file using loadConfigFile().',
-                    'You must first set the configuration file using setConfigFile()',
+                    'You must first set the configuration file using setConfigFile().',
                     'Log file may not be blank.',
+                    'The configuration file is not valid.',
                 );
 
         }
@@ -362,5 +362,12 @@ class KeyValuePair {
     public function __construct(string $name="", string $value= "") {
         $this->name = $name;
         $this->value = $value;
+    }
+}
+
+class ConfigFileException extends Exception {
+    public function __construct(string $message = "", int $code = 0, Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
     }
 }
