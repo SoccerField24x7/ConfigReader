@@ -2,9 +2,11 @@
 /**
  * Highly flexible class to parse a key=value configuration (ini) file.
  *
- * @version 1.0
+ * @version 2.0.0
  * @author Jesse Quijano
  */
+declare(strict_types=1);
+
 class ConfigReader {
     public $ErrNo = 0;
     public $Error = "";
@@ -19,22 +21,30 @@ class ConfigReader {
     private $ParameterCount = 0;
     private $CommentCount = 0;
     private $WhiteSpaceCount = 0;
+    private $arryMessages;
     
-    const INT = 1;
-    const FLOAT = 2;
-    const STRING = 3;
-    const BOOLEAN = 4;
-    const ASSUME_BOOL = true;  //use this to change yes/no, on/off, true/false to actual boolean values
+    public const INT = 1;
+    public const FLOAT = 2;
+    public const STRING = 3;
+    public const BOOLEAN = 4;
+    public const ASSUME_BOOL = true;  //use this to change yes/no, on/off, true/false to actual boolean values
     
-    public function __construct($logfile = "") {
-        /* allow instantiation without passing the logfile */
+    public function __construct(string $logfile = "") {
+        /* allow instantiation without passing the logfile, but if you do validate and die if  */
         if($logfile != "") {
+
             if(!$this->isFileValid($logfile)) {
-                return false; //error variables will be set in method
+
+                throw new Exception();
             }
+
             $this->ConfigFile = $logfile;
-            
-            /* could continue to auto-load the file here, but what fun would that be for the demo?  :) */
+            if(!$this->setConfigFile($logfile)) {
+
+                throw new Exception();
+            }
+
+            $this->initMessages();
         }
     }
     
@@ -44,15 +54,19 @@ class ConfigReader {
      * @param string $logfile Complete path to the configuration file.
      * @return boolean
      */
-    public function setConfigFile($logfile) {
+    public function setConfigFile(string $logfile) : bool {
         if($logfile == "") {
-            $this->raiseError(905, "Log file may not be blank.");
+
+            $this->raiseError(6);
+
             return false;
         }
         if(!$this->isFileValid($logfile)) {
+
             return false;
         }
         $this->ConfigFile = $logfile;
+
         return true;
     }
     /**
@@ -60,72 +74,90 @@ class ConfigReader {
      * 
      * @return boolean
      */
-    public function loadConfigFile() {
+    public function loadConfigFile() : bool {
+
         if($this->ConfigFile == "") {
-            $this->raiseError(913,"You must first set the configuration file using setConfigFile().");
+            $this->raiseError(5);
+
             return false;
         }
+
         if(!$this->readConfigFile()) {
+
             return false;
         }
+
         $this->ConfigLoaded = true;
+
         return true;
     }
     
-    public function clearError() {
-        $this->raiseError(0, "");
+    public function clearError() : void {
+        $this->raiseError(0, "reset");
     }
     
-    public function getConfigFileSize() {
+    public function getConfigFileSize() : int {
         if($this->ConfigFile == "") {
-            $this->raiseError(908, "You must first set the configuration file using setConfigFile().");
-            return false;
+            $this->raiseError(5);
+
+            return -1;
         }
+
         return $this->FileSize;
     }
     
-    public function getConfigLineCount() {
+    public function getConfigLineCount() : int {
         if($this->ConfigFile == "") {
-            $this->raiseError(910, "You must first set the configuration file using setConfigFile().");
-            return false;
+            $this->raiseError(5);
+
+            return -1;
         }
+
         return $this->FileLines;
     }
     
     public function getParameterCount() {
         if(!$this->ConfigLoaded) {
-            $this->raiseError(916, "You must first load the configuration file using loadConfigFile().");
+            $this->raiseError(4);
+
             return false;
         }
+
         return $this->ParameterCount;   
     }
     
     public function getBlankLineCount() {
         if(!$this->ConfigLoaded) {
-            $this->raiseError(917, "You must first load the configuration file using loadConfigFile().");
+            $this->raiseError(4);
+
             return false;
         }
+
         return $this->WhiteSpaceCount;
     }
     
     public function getCommentCount() {
         if(!$this->ConfigLoaded) {
-            $this->raiseError(918, "You must first load the configuration file using loadConfigFile().");
+            $this->raiseError(4);
+
             return false;
         }
+
         return $this->CommentCount;
     }
     
-    public function getParameterByName($name) {
+    public function getParameterByName(string $name) {
         for($i=0 ; $i < $this->ParameterCount ; $i++) {
             if($this->arryConfigItems[$i]->name == $name) {
                 return $this->arryConfigItems[$i]->value;
             }
         }
+
         return false;
     }
     
-    public function Parameter($index) {
+    public function Parameter(int $index) {
+
         return $this->arryConfigItems[$index];
     }
     /**
@@ -134,26 +166,31 @@ class ConfigReader {
      * @param string $logpath Complete path to the configuration file.
      * @return boolean
      */
-    private function isFileValid($logpath) {
+    private function isFileValid(string $logpath) {
         if(file_exists($logpath) === false) {
-            $this->raiseError(900, "The specified file '" . $logpath . "' does not exist.");
+            $this->raiseError(0, "The specified file '" . $logpath . "' does not exist.");
+
             return false;
         }
         $ret = $this->FileSize = filesize($logpath);
         if($ret === false) {
-            $this->raiseError(902, "Error retrieving file size.");
+            $this->raiseError(3);
+
             return false;
         }
         
         if($this->FileSize == 0) {
-            $this->raiseError(903, "The specified file is 0 bytes (no data).");
+            $this->raiseError(2);
+
             return false;
         }
         
         if(!$this->countFileLines($logpath)) {
-            $this->raiseError(909, "The file could not be opened.");
+            $this->raiseError(1);
+
             return false;
         }
+
         return true;
     }
     /**
@@ -161,9 +198,10 @@ class ConfigReader {
      * @param string $logpath Complete path to the configuration file.
      * @return boolean
      */
-    private function countFileLines($logpath) {
+    private function countFileLines(string $logpath) {
         if(!$fp = fopen($logpath, "r")) {
-            $this->raiseError(901, "The file could not be opened.");
+            $this->raiseError(1);
+
             return false;
         }
         $lines = 0;
@@ -171,7 +209,8 @@ class ConfigReader {
             $lines += substr_count(fread($fp, 8192), "\n");           
         }
         fclose($fp);
-        $this->FileLines = $lines +1;  //add 1 for final line (no \n).  Could have also started $lines at 1.
+        $this->FileLines = $lines + 1;  //add 1 for final line (no \n).  Could have also started $lines at 1.
+
         return true;
     }
     
@@ -181,7 +220,7 @@ class ConfigReader {
      */
     private function readConfigFile() {
         if(!$fp = fopen($this->ConfigFile, "r")) {
-            $this->raiseError(907, "Could not open " . $this->ConfigFile);
+            $this->raiseError(0, "Could not open " . $this->ConfigFile);
             return false;
         }
         while(!feof($fp)) {
@@ -201,9 +240,9 @@ class ConfigReader {
      * @param int $errno 
      * @param string $error 
      */
-    private function raiseError($errno, $error) {
+    private function raiseError(int $errno, string $error="") {
         $this->ErrNo = $errno;
-        $this->Error = $error;
+        empty($error) ? $this->Error = $this->arryMessages[$errno] : $this->Error = $error;
     }
     
     /**
@@ -215,14 +254,15 @@ class ConfigReader {
      * @param int $lineno (optional) Specifies the line number within the configuration file of $line.
      * @return boolean
      */
-    private function getValue($line, $lineno=0) {
+    private function getValue(string $line, int $lineno=0) : bool {
         /* first, does this line have any teeth? */
         if(!$this->isComment($line)) {
             /* next we see if the key/value marker exists */
             $pos = strpos($line, "=");
             if($pos === false) {
                 /* nope, send them back where they came from */
-                $this->raiseError(906, "Invalid configuration data found on line " . $lineno);
+                $this->raiseError(0, "Invalid configuration data found on line " . $lineno);
+
                 return false;
             }
             /* it's good, trim out the good stuff */
@@ -257,6 +297,7 @@ class ConfigReader {
             
             $oParam = null;
         }
+
         return true;
     }
     
@@ -265,7 +306,7 @@ class ConfigReader {
      * @param string $line Single line from configruation file.
      * @return boolean
      */
-    private function isComment($line) {
+    private function isComment($line) : bool {
         if(trim($line) == '\n' || trim($line) == "") {
             $this->WhiteSpaceCount++;
             return true;
@@ -275,6 +316,27 @@ class ConfigReader {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Initializes array of message strings. In preparation for multi-language support.
+     */
+    private function initMessages($language="EN") {
+
+        switch($language){
+
+            default:
+                $this->arryMessages = array(
+                    '',
+                    'The file could not be opened.',
+                    'The specified file is 0 bytes (no data).',
+                    'Error retrieving file size.',
+                    'You must first load the configuration file using loadConfigFile().',
+                    'You must first set the configuration file using setConfigFile()',
+                    'Log file may not be blank.',
+                );
+
+        }
     }
 }
 
