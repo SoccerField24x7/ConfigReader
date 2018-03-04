@@ -116,31 +116,31 @@ class ConfigReader {
         return $this->FileLines;
     }
     
-    public function getParameterCount() {
+    public function getParameterCount() : int {
         if(!$this->ConfigLoaded) {
             $this->raiseError(4);
 
-            return false;
+            return -1;
         }
 
         return $this->ParameterCount;   
     }
     
-    public function getBlankLineCount() {
+    public function getBlankLineCount() : int {
         if(!$this->ConfigLoaded) {
             $this->raiseError(4);
 
-            return false;
+            return -1;
         }
 
         return $this->WhiteSpaceCount;
     }
     
-    public function getCommentCount() {
+    public function getCommentCount() : int {
         if(!$this->ConfigLoaded) {
             $this->raiseError(4);
 
-            return false;
+            return -1;
         }
 
         return $this->CommentCount;
@@ -149,6 +149,7 @@ class ConfigReader {
     public function getParameterByName(string $name) {
         for($i=0 ; $i < $this->ParameterCount ; $i++) {
             if($this->arryConfigItems[$i]->name == $name) {
+
                 return $this->arryConfigItems[$i]->value;
             }
         }
@@ -218,7 +219,7 @@ class ConfigReader {
      * Reads the configuration file, line by line and calling getValue() to extract key/value pairs.
      * @return boolean
      */
-    private function readConfigFile() {
+    private function readConfigFile() : bool {
         if(!$fp = fopen($this->ConfigFile, "r")) {
             $this->raiseError(0, "Could not open " . $this->ConfigFile);
             return false;
@@ -232,6 +233,7 @@ class ConfigReader {
             $lineno++;
         }
         fclose($fp);
+
         return true;
     }
     
@@ -265,6 +267,7 @@ class ConfigReader {
 
                 return false;
             }
+
             /* it's good, trim out the good stuff */
             $key = trim(substr($line,0,$pos));
             $value = trim(substr($line,$pos+1));
@@ -306,22 +309,25 @@ class ConfigReader {
      * @param string $line Single line from configruation file.
      * @return boolean
      */
-    private function isComment($line) : bool {
-        if(trim($line) == '\n' || trim($line) == "") {
+    private function isComment(string $line) : bool {
+        if(trim($line) == '\n' || empty(trim($line))) {
             $this->WhiteSpaceCount++;
+
             return true;
         }
         if(in_array(trim(substr($line,0,1)),$this->arryCommentMarkers) || in_array(trim(substr($line,0,2)),$this->arryCommentMarkers)) {
             $this->CommentCount++;
+
             return true;
         }
+
         return false;
     }
 
     /**
      * Initializes array of message strings. In preparation for multi-language support.
      */
-    private function initMessages($language="EN") {
+    private function initMessages(string $language="EN") : void {
 
         switch($language){
 
@@ -353,7 +359,7 @@ class KeyValuePair {
     public $value = "";
     public $datatype = 0;
     
-    public function __construct($name="", $value= "") {
+    public function __construct(string $name="", string $value= "") {
         $this->name = $name;
         $this->value = $value;
     }
