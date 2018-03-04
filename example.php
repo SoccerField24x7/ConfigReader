@@ -52,9 +52,11 @@ if($val === false) {
 $oReader = null;
 
 print "<br /><br /><strong>Let's try to load a file that doesn't exist:</strong>";
-$oReader = new ConfigReader("/path/thisfileisnothere.ini");
-if($oReader->ErrNo) {
-    print "<br />" . $oReader->Error;
+try {
+    $oReader = new ConfigReader("/path/thisfileisnothere.ini");
+} catch(ConfigFileException $ex) {
+
+    print "<br />" . $ex->getMessage();
 }
 
 ?>
